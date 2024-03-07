@@ -33,26 +33,17 @@ import io.sui.models.governance.DelegatedStake;
 import io.sui.models.governance.SuiCommitteeInfo;
 import io.sui.models.governance.SystemStateSummary;
 import io.sui.models.governance.ValidatorsApy;
-import io.sui.models.objects.Checkpoint;
-import io.sui.models.objects.MoveFunctionArgType;
-import io.sui.models.objects.MoveNormalizedFunction;
-import io.sui.models.objects.MoveNormalizedModule;
-import io.sui.models.objects.MoveNormalizedStruct;
-import io.sui.models.objects.ObjectDataOptions;
-import io.sui.models.objects.ObjectResponseQuery;
-import io.sui.models.objects.PaginatedCheckpoint;
-import io.sui.models.objects.PaginatedObjectsResponse;
-import io.sui.models.objects.SuiObjectRef;
-import io.sui.models.objects.SuiObjectResponse;
+import io.sui.models.objects.*;
 import io.sui.models.transactions.PaginatedTransactionBlockResponse;
 import io.sui.models.transactions.TransactionBlockResponse;
 import io.sui.models.transactions.TransactionBlockResponseOptions;
 import io.sui.models.transactions.TransactionBlockResponseQuery;
+import org.apache.commons.lang3.StringUtils;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * The type Sui client.
@@ -60,7 +51,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author grapebaba
  * @since 2022.11
  */
-public class QueryClientImpl implements QueryClient {
+public class BfcQueryClientImpl implements QueryClient {
 
   private final JsonRpcClientProvider jsonRpcClientProvider;
 
@@ -69,7 +60,7 @@ public class QueryClientImpl implements QueryClient {
    *
    * @param jsonRpcClientProvider the json rpc client provider
    */
-  public QueryClientImpl(JsonRpcClientProvider jsonRpcClientProvider) {
+  public BfcQueryClientImpl(JsonRpcClientProvider jsonRpcClientProvider) {
     this.jsonRpcClientProvider = jsonRpcClientProvider;
   }
 
@@ -78,9 +69,9 @@ public class QueryClientImpl implements QueryClient {
       String id, ObjectDataOptions objectDataOptions) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getObject", Lists.newArrayList(id, objectDataOptions));
+            "bfc_getObject", Lists.newArrayList(id, objectDataOptions));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getObject", request, new TypeToken<SuiObjectResponse>() {}.getType());
+        "/bfc_getObject", request, new TypeToken<SuiObjectResponse>() {}.getType());
   }
 
   public CompletableFuture<SuiObjectRef> getObjectRef(
@@ -102,9 +93,9 @@ public class QueryClientImpl implements QueryClient {
   public CompletableFuture<Long> getTotalTransactionBlocks() {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getTotalTransactionBlocks", Lists.newArrayList());
+            "bfc_getTotalTransactionBlocks", Lists.newArrayList());
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getTotalTransactionBlocks", request, new TypeToken<Long>() {}.getType());
+        "/bfc_getTotalTransactionBlocks", request, new TypeToken<Long>() {}.getType());
   }
 
   @Override
@@ -112,9 +103,9 @@ public class QueryClientImpl implements QueryClient {
       String digest, TransactionBlockResponseOptions options) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getTransactionBlock", Lists.newArrayList(digest, options));
+            "bfc_getTransactionBlock", Lists.newArrayList(digest, options));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getTransactionBlock",
+        "/bfc_getTransactionBlock",
         request,
         new TypeToken<TransactionBlockResponse>() {}.getType());
   }
@@ -124,9 +115,9 @@ public class QueryClientImpl implements QueryClient {
       List<String> digests, TransactionBlockResponseOptions options) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_multiGetTransactionBlocks", Lists.newArrayList(digests, options));
+            "bfc_multiGetTransactionBlocks", Lists.newArrayList(digests, options));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_multiGetTransactionBlocks",
+        "/bfc_multiGetTransactionBlocks",
         request,
         new TypeToken<List<TransactionBlockResponse>>() {}.getType());
   }
@@ -136,9 +127,9 @@ public class QueryClientImpl implements QueryClient {
       List<String> objectIds, ObjectDataOptions options) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_multiGetObjects", Lists.newArrayList(objectIds, options));
+            "bfc_multiGetObjects", Lists.newArrayList(objectIds, options));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_multiGetObjects", request, new TypeToken<List<SuiObjectResponse>>() {}.getType());
+        "/bfc_multiGetObjects", request, new TypeToken<List<SuiObjectResponse>>() {}.getType());
   }
 
   @Override
@@ -146,9 +137,9 @@ public class QueryClientImpl implements QueryClient {
       EventFilter eventFilter, EventId cursor, Integer limit, boolean isDescOrder) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_queryEvents", Lists.newArrayList(eventFilter, cursor, limit, isDescOrder));
+            "bfcx_queryEvents", Lists.newArrayList(eventFilter, cursor, limit, isDescOrder));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_queryEvents", request, new TypeToken<PaginatedEvents>() {}.getType());
+        "/bfcx_queryEvents", request, new TypeToken<PaginatedEvents>() {}.getType());
   }
 
   @Override
@@ -156,9 +147,9 @@ public class QueryClientImpl implements QueryClient {
       String packageId) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getNormalizedMoveModulesByPackage", Lists.newArrayList(packageId));
+            "bfc_getNormalizedMoveModulesByPackage", Lists.newArrayList(packageId));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getNormalizedMoveModulesByPackage",
+        "/bfc_getNormalizedMoveModulesByPackage",
         request,
         new TypeToken<Map<String, MoveNormalizedModule>>() {}.getType());
   }
@@ -167,9 +158,9 @@ public class QueryClientImpl implements QueryClient {
   public CompletableFuture<SuiCommitteeInfo> getCommitteeInfo(BigInteger epoch) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_getCommitteeInfo", Lists.newArrayList(epoch.toString()));
+            "bfcx_getCommitteeInfo", Lists.newArrayList(epoch.toString()));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getCommitteeInfo", request, new TypeToken<SuiCommitteeInfo>() {}.getType());
+        "/bfcx_getCommitteeInfo", request, new TypeToken<SuiCommitteeInfo>() {}.getType());
   }
 
   @Override
@@ -177,9 +168,9 @@ public class QueryClientImpl implements QueryClient {
       String suiPackage, String module, String function) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getMoveFunctionArgTypes", Lists.newArrayList(suiPackage, module, function));
+            "bfc_getMoveFunctionArgTypes", Lists.newArrayList(suiPackage, module, function));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getMoveFunctionArgTypes",
+        "/bfc_getMoveFunctionArgTypes",
         request,
         new TypeToken<List<MoveFunctionArgType>>() {}.getType());
   }
@@ -189,9 +180,9 @@ public class QueryClientImpl implements QueryClient {
       String suiPackage, String module, String function) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getNormalizedMoveFunction", Lists.newArrayList(suiPackage, module, function));
+            "bfc_getNormalizedMoveFunction", Lists.newArrayList(suiPackage, module, function));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getNormalizedMoveFunction",
+        "/bfc_getNormalizedMoveFunction",
         request,
         new TypeToken<MoveNormalizedFunction>() {}.getType());
   }
@@ -201,9 +192,9 @@ public class QueryClientImpl implements QueryClient {
       String suiPackage, String module) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getNormalizedMoveModule", Lists.newArrayList(suiPackage, module));
+            "bfc_getNormalizedMoveModule", Lists.newArrayList(suiPackage, module));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getNormalizedMoveModule",
+        "/bfc_getNormalizedMoveModule",
         request,
         new TypeToken<MoveNormalizedModule>() {}.getType());
   }
@@ -213,9 +204,9 @@ public class QueryClientImpl implements QueryClient {
       String suiPackage, String module, String struct) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getNormalizedMoveStruct", Lists.newArrayList(suiPackage, module, struct));
+            "bfc_getNormalizedMoveStruct", Lists.newArrayList(suiPackage, module, struct));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getNormalizedMoveStruct",
+        "/bfc_getNormalizedMoveStruct",
         request,
         new TypeToken<MoveNormalizedStruct>() {}.getType());
   }
@@ -225,9 +216,9 @@ public class QueryClientImpl implements QueryClient {
       TransactionBlockResponseQuery query, String cursor, Integer limit, boolean isDescOrder) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_queryTransactionBlocks", Lists.newArrayList(query, cursor, limit, isDescOrder));
+            "bfcx_queryTransactionBlocks", Lists.newArrayList(query, cursor, limit, isDescOrder));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_queryTransactionBlocks",
+        "/bfcx_queryTransactionBlocks",
         request,
         new TypeToken<PaginatedTransactionBlockResponse>() {}.getType());
   }
@@ -239,27 +230,27 @@ public class QueryClientImpl implements QueryClient {
     }
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_getCoinMetadata", Lists.newArrayList(coinType));
+            "bfcx_getCoinMetadata", Lists.newArrayList(coinType));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getCoinMetadata", request, new TypeToken<CoinMetadata>() {}.getType());
+        "/bfcx_getCoinMetadata", request, new TypeToken<CoinMetadata>() {}.getType());
   }
 
   @Override
   public CompletableFuture<Long> getReferenceGasPrice() {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_getReferenceGasPrice", Lists.newArrayList());
+            "bfcx_getReferenceGasPrice", Lists.newArrayList());
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getReferenceGasPrice", request, new TypeToken<Long>() {}.getType());
+        "/bfcx_getReferenceGasPrice", request, new TypeToken<Long>() {}.getType());
   }
 
   @Override
   public CompletableFuture<List<Balance>> getAllBalances(String address) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_getAllBalances", Lists.newArrayList(address));
+            "bfcx_getAllBalances", Lists.newArrayList(address));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getAllBalances", request, new TypeToken<List<Balance>>() {}.getType());
+        "/bfcx_getAllBalances", request, new TypeToken<List<Balance>>() {}.getType());
   }
 
   @Override
@@ -267,9 +258,9 @@ public class QueryClientImpl implements QueryClient {
       String address, String cursor, Integer limit) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_getAllCoins", Lists.newArrayList(address, cursor, limit));
+            "bfcx_getAllCoins", Lists.newArrayList(address, cursor, limit));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getAllCoins", request, new TypeToken<PaginatedCoins>() {}.getType());
+        "/bfcx_getAllCoins", request, new TypeToken<PaginatedCoins>() {}.getType());
   }
 
   @Override
@@ -280,9 +271,9 @@ public class QueryClientImpl implements QueryClient {
     }
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_getCoins", Lists.newArrayList(address, coinType, cursor, limit));
+            "bfcx_getCoins", Lists.newArrayList(address, coinType, cursor, limit));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getCoins", request, new TypeToken<PaginatedCoins>() {}.getType());
+        "/bfcx_getCoins", request, new TypeToken<PaginatedCoins>() {}.getType());
   }
 
   @Override
@@ -301,27 +292,27 @@ public class QueryClientImpl implements QueryClient {
   public CompletableFuture<Checkpoint> getCheckpoint(String checkpointId) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getCheckpoint", Lists.newArrayList(checkpointId));
+            "bfc_getCheckpoint", Lists.newArrayList(checkpointId));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getCheckpoint", request, new TypeToken<Checkpoint>() {}.getType());
+        "/bfc_getCheckpoint", request, new TypeToken<Checkpoint>() {}.getType());
   }
 
   @Override
   public CompletableFuture<ValidatorsApy> getValidatorsApy() {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_getValidatorsApy", Lists.newArrayList());
+            "bfcx_getValidatorsApy", Lists.newArrayList());
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getValidatorsApy", request, new TypeToken<ValidatorsApy>() {}.getType());
+        "/bfcx_getValidatorsApy", request, new TypeToken<ValidatorsApy>() {}.getType());
   }
 
   @Override
   public CompletableFuture<CoinSupply> getTotalSupply(String coin) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_getTotalSupply", Lists.newArrayList(coin));
+            "bfcx_getTotalSupply", Lists.newArrayList(coin));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getTotalSupply", request, new TypeToken<CoinSupply>() {}.getType());
+        "/bfcx_getTotalSupply", request, new TypeToken<CoinSupply>() {}.getType());
   }
 
   @Override
@@ -329,27 +320,27 @@ public class QueryClientImpl implements QueryClient {
     List<List<String>> params = Lists.newArrayList();
     params.add(stakedSuiIds);
     final JsonRpc20Request request =
-        this.jsonRpcClientProvider.createJsonRpc20Request("suix_getStakesByIds", params);
+        this.jsonRpcClientProvider.createJsonRpc20Request("bfcx_getStakesByIds", params);
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getStakesByIds", request, new TypeToken<List<DelegatedStake>>() {}.getType());
+        "/bfcx_getStakesByIds", request, new TypeToken<List<DelegatedStake>>() {}.getType());
   }
 
   @Override
   public CompletableFuture<List<DelegatedStake>> getStakes(String owner) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_getStakes", Lists.newArrayList(owner));
+            "bfcx_getStakes", Lists.newArrayList(owner));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getStakes", request, new TypeToken<List<DelegatedStake>>() {}.getType());
+        "/bfcx_getStakes", request, new TypeToken<List<DelegatedStake>>() {}.getType());
   }
 
   @Override
   public CompletableFuture<SystemStateSummary> getLatestSuiSystemState() {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "suix_getLatestSuiSystemState", Lists.newArrayList());
+            "bfcx_getLatestSuiSystemState", Lists.newArrayList());
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/suix_getLatestSuiSystemState", request, new TypeToken<SystemStateSummary>() {}.getType());
+        "/bfcx_getLatestSuiSystemState", request, new TypeToken<SystemStateSummary>() {}.getType());
   }
 
   @Override
@@ -357,27 +348,27 @@ public class QueryClientImpl implements QueryClient {
       String cursor, Integer limit, boolean isDescOrder) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getCheckpoints", Lists.newArrayList(cursor, limit, isDescOrder));
+            "bfc_getCheckpoints", Lists.newArrayList(cursor, limit, isDescOrder));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getCheckpoints", request, new TypeToken<PaginatedCheckpoint>() {}.getType());
+        "/bfc_getCheckpoints", request, new TypeToken<PaginatedCheckpoint>() {}.getType());
   }
 
   @Override
   public CompletableFuture<List<SuiEvent>> getEvents(String transactionDigest) {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getEvents", Lists.newArrayList(transactionDigest));
+            "bfc_getEvents", Lists.newArrayList(transactionDigest));
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getEvents", request, new TypeToken<List<SuiEvent>>() {}.getType());
+        "/bfc_getEvents", request, new TypeToken<List<SuiEvent>>() {}.getType());
   }
 
   @Override
   public CompletableFuture<BigInteger> getLatestCheckpointSequenceNumber() {
     final JsonRpc20Request request =
         this.jsonRpcClientProvider.createJsonRpc20Request(
-            "sui_getLatestCheckpointSequenceNumber", Lists.newArrayList());
+            "bfc_getLatestCheckpointSequenceNumber", Lists.newArrayList());
     return this.jsonRpcClientProvider.callAndUnwrapResponse(
-        "/sui_getLatestCheckpointSequenceNumber",
+        "/bfc_getLatestCheckpointSequenceNumber",
         request,
         new TypeToken<BigInteger>() {}.getType());
   }

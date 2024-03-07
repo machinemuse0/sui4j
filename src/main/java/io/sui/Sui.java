@@ -26,16 +26,7 @@ import io.sui.bcsgen.Intent;
 import io.sui.bcsgen.SuiAddress;
 import io.sui.bcsgen.SuiAddress.Builder;
 import io.sui.bcsgen.TransactionData;
-import io.sui.clients.BcsSerializationException;
-import io.sui.clients.ExecutionClient;
-import io.sui.clients.ExecutionClientImpl;
-import io.sui.clients.FaucetClient;
-import io.sui.clients.OkhttpFaucetClient;
-import io.sui.clients.QueryClient;
-import io.sui.clients.QueryClientImpl;
-import io.sui.clients.SubscribeClient;
-import io.sui.clients.SubscribeClientImpl;
-import io.sui.clients.TransactionBlock;
+import io.sui.clients.*;
 import io.sui.crypto.FileBasedKeyStore;
 import io.sui.crypto.KeyResponse;
 import io.sui.crypto.KeyStore;
@@ -124,6 +115,24 @@ public class Sui {
     this.faucetClient = new OkhttpFaucetClient(faucetEndpoint, jsonHandler);
   }
 
+    public Sui(boolean isBfc, String fullNodeEndpoint, String faucetEndpoint, String keyStorePath) {
+        this.keyStore = new FileBasedKeyStore(keyStorePath);
+        final JsonHandler jsonHandler = new GsonJsonHandler();
+        final JsonRpcClientProvider jsonRpcClientProvider =
+                new OkHttpJsonRpcClientProvider(fullNodeEndpoint, jsonHandler);
+        if (isBfc) {
+            this.queryClient = new BfcQueryClientImpl(jsonRpcClientProvider);
+            this.executionClient = new BfcExecutionClientImpl(jsonRpcClientProvider);
+            this.subscribeClient = new BfcSubscribeClientImpl(jsonRpcClientProvider);
+        } else {
+            this.queryClient = new QueryClientImpl(jsonRpcClientProvider);
+            this.executionClient = new ExecutionClientImpl(jsonRpcClientProvider);
+            this.subscribeClient = new SubscribeClientImpl(jsonRpcClientProvider);
+        }
+        this.faucetClient = new OkhttpFaucetClient(faucetEndpoint, jsonHandler);
+    }
+
+
   /**
    * Request sui from faucet completable future.
    *
@@ -207,7 +216,7 @@ public class Sui {
                                             CompletableFuture<TransactionBlockResponse>>)
                                         transactionData ->
                                             executeTransaction(
-                                                sender, transactionData,
+                                                Utils.convertToEvmAddress(sender), transactionData,
                                                 transactionBlockResponseOptions, requestType));
                               });
                 });

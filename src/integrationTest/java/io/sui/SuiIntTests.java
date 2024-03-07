@@ -57,8 +57,11 @@ import io.sui.models.transactions.TransactionBlockResponseQuery;
 import io.sui.models.transactions.TransactionFilter.FromAddressFilter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -81,29 +84,32 @@ import org.junit.jupiter.api.Test;
  */
 public class SuiIntTests {
 
-  private static final String BASE_NODE_URL = "http://localhost:9000";
+//  private static final String BASE_NODE_URL = "http://localhost:9000";
+  private static final String BASE_NODE_URL = "http://127.0.0.1:9000";
   // private static final String BASE_NODE_URL = "https://fullnode.devnet.sui.io:443";
 
-  private static final String BASE_FAUCET_URL = "http://localhost:9123";
+//  private static final String BASE_FAUCET_URL = "http://localhost:9123";
+  private static final String BASE_FAUCET_URL = "http://127.0.0.1:9123";
   // private static final String BASE_FAUCET_URL = "https://faucet.devnet.sui.io";
 
-  //  private static final String TEST_KEY_STORE_PATH =
-  //      System.getProperty("user.home") + "/.sui/sui_config/sui.keystore";
+    private static final String TEST_KEY_STORE_PATH =
+        System.getProperty("user.home") + "/.bfc/bfc_config/bfc.keystore";
+//        System.getProperty("user.home") + "/.sui/sui_config/sui.keystore";
 
   private static final String KEY_STORE_PATH =
       Paths.get("src", "integrationTest", "sui.keystore").toAbsolutePath().toString();
 
-  private static final Sui SUI = new Sui(BASE_NODE_URL, BASE_FAUCET_URL, KEY_STORE_PATH);
+  private static final Sui SUI = new Sui(true, BASE_NODE_URL, BASE_FAUCET_URL, TEST_KEY_STORE_PATH);
 
   @BeforeAll
   static void setUp() {
-    newAddress();
-    requestSuiFromFaucet();
+//    newAddress();
+//    requestSuiFromFaucet();
   }
 
   @AfterAll
   static void tearDown() throws IOException {
-    Files.delete(Paths.get("src", "integrationTest", "sui.keystore").toAbsolutePath());
+//    Files.delete(Paths.get("src", "integrationTest", "sui.keystore").toAbsolutePath());
   }
 
   /** New address. */
@@ -606,7 +612,7 @@ public class SuiIntTests {
     if (!sender.isPresent()) {
       Assertions.fail();
     }
-    CompletableFuture<Balance> res = SUI.getBalance(sender.get(), null);
+    CompletableFuture<Balance> res = SUI.getBalance(sender.get(), "0x2::bfc::BFC");
     System.out.printf("balance:%s%n", res.get());
   }
 
@@ -640,13 +646,15 @@ public class SuiIntTests {
     if (!sender.isPresent()) {
       Assertions.fail();
     }
-
+    String senderAddress = Utils.toBfcAddress(sender.get());
+    System.out.println("sender: " + sender + "," + senderAddress);
     final Optional<String> recipient =
         SUI.addresses().stream().filter(s -> !s.equals(sender.get())).findFirst();
     if (!recipient.isPresent()) {
       Assertions.fail();
     }
-
+    String recipientAddress = Utils.toBfcAddress(recipient.get());
+    System.out.println("recipient: " + recipient + "," + recipientAddress);
     TransactionBlockResponseOptions transactionBlockResponseOptions =
         new TransactionBlockResponseOptions();
     transactionBlockResponseOptions.setShowEffects(true);
@@ -655,12 +663,12 @@ public class SuiIntTests {
     transactionBlockResponseOptions.setShowObjectChanges(true);
     CompletableFuture<TransactionBlockResponse> res =
         SUI.transferSui(
-            sender.get(),
+                senderAddress,
             null,
-            recipient.get(),
-            20000L,
+                recipientAddress,
+            5000000000L,
             null,
-            3000000L,
+                1000000L,
             null,
             null,
             transactionBlockResponseOptions,

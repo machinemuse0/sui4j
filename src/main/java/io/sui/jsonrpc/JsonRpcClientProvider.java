@@ -76,6 +76,7 @@ public abstract class JsonRpcClientProvider {
     this.call(request, url, typeOfT)
         .thenAccept(
             jsonRpc20Response -> {
+              System.out.println("response: " + jsonRpc20Response.toString());
               if (jsonRpc20Response.getError() != null) {
                 final SuiApiException e;
                 if (jsonRpc20Response.getThrowable() != null) {

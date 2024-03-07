@@ -101,6 +101,7 @@ public class TransactionBlock {
   private static final Struct RESOLVED_SUI_ID = new Struct();
   private static final Struct RESOLVED_STD_OPTION = new Struct();
   private static final String GAS_COIN_TYPE = "0x2::coin::Coin<0x2::sui::SUI>";
+  private static final String BFC_GAS_COIN_TYPE = "0x2::coin::Coin<0x2::bfc::BFC>";
 
   static {
     RESOLVED_ASCII_STR.setAddress("0x1");
@@ -638,7 +639,7 @@ public class TransactionBlock {
                                         && objectResponse
                                             .getData()
                                             .getType()
-                                            .equals(GAS_COIN_TYPE)) {
+                                            .equals(BFC_GAS_COIN_TYPE)) {
                                       GasCoin gasCoin;
                                       try {
                                         gasCoin =
@@ -1037,9 +1038,19 @@ public class TransactionBlock {
    * @return the list
    */
   @NotNull public List<Byte> geAddressBytes(String address) {
+      String addr = address;
+      if(address.startsWith("0x")){
+          addr = StringUtils.removeStart(address, "0x");
+          if (addr.length() > 64) {
+              addr = addr.substring(0, 64);
+          }
+      }else if(address.startsWith("BFC")){
+          addr = StringUtils.removeStart(address, "BFC");
+      }
+
     return Arrays.asList(
         ArrayUtils.toObject(
-            Hex.decode(StringUtils.leftPad(StringUtils.removeStart(address, "0x"), 64, "0"))));
+            Hex.decode(StringUtils.leftPad(addr, 64, "0"))));
   }
 
   /**
@@ -1050,7 +1061,7 @@ public class TransactionBlock {
    */
   public String toAddress(List<Byte> addressBytes) {
     return StringUtils.prependIfMissing(
-        Hex.toHexString(ArrayUtils.toPrimitive(addressBytes.toArray(new Byte[0]))), "0x");
+        Hex.toHexString(ArrayUtils.toPrimitive(addressBytes.toArray(new Byte[0]))), "BFC");
   }
 
   private Tuple3<ObjectID, SequenceNumber, ObjectDigest> getObjectRef(SuiObjectRef objRef) {

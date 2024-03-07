@@ -10,6 +10,14 @@ final class TraitHelpers {
         }
     }
 
+    static void serialize_array34_u8_array(java.util.@com.novi.serde.ArrayLen(length=34) List<@com.novi.serde.Unsigned Byte> value, com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError {
+        if (value.size() != 34) {
+            throw new IllegalArgumentException("Invalid length for fixed-size array: " + value.size() + " instead of "+ 34);
+        }
+        for (@com.novi.serde.Unsigned Byte item : value) {
+            serializer.serialize_u8(item);
+        }
+    }
     static java.util.@com.novi.serde.ArrayLen(length=32) List<@com.novi.serde.Unsigned Byte> deserialize_array32_u8_array(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {
         java.util.List<@com.novi.serde.Unsigned Byte> obj = new java.util.ArrayList<@com.novi.serde.Unsigned Byte>(32);
         for (long i = 0; i < 32; i++) {
